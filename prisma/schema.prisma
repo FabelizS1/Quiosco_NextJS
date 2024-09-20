@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id   Int    @id  @default(autoincrement())
+  name String
+  slug String
+  products Product[]
+}
+
+model Product {
+  id    Int     @id  @default(autoincrement())
+  name  String
+  price Float
+  image String
+  categoryId Int
+  category   Category   @relation(fields: [categoryId], references: [id])
+  orderItems OrderProducts[]  // Esta es la relacion con la tabla de OrderProducts
+}
+
+
+model Order {
+  id      Int   @id   @default(autoincrement())
+  name    String
+  total   Float
+  date    DateTime  @default(now())
+  status  Boolean   @default(false)
+  orderReadyAt  DateTime?  // con el ? se dice que el valor va a ser opcional
+  orderProducts OrderProducts[] // Aqui manda la relacion de orden, donde OrderProducts[]  es el modelo de abajo y va a se un arreglo con muchos
+}
+
+model OrderProducts {
+  id          Int     @id   @default(autoincrement())
+  orderId     Int   // Lleva el orderId
+  order       Order   @relation(fields: [orderId], references: [id])  // Esta es la tabla que tiene la relacion de orden con esta tabla
+  productId   Int   // lleva el productId
+  product     Product @relation(fields: [productId], references: [id]) // Si se pone en rojo por error es que necesita la relacion con Product
+  quantity    Int
+}
